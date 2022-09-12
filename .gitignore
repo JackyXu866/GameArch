@@ -52,12 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Visual Studio junk
-*.tlog
-*.log
-*.recipe
-*.filters
 *.user
-*.lastbuildstate
-*.ipch
-*.suo
-*.db
+.vscode/
+.vs/
+x64/
