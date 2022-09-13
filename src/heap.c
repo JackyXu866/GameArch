@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+
 typedef struct arena_t
 {
 	pool_t pool;
@@ -21,6 +22,9 @@ typedef struct heap_t
 	size_t grow_increment;
 	arena_t* arena;
 } heap_t;
+
+
+static void default_walker(void* ptr, size_t size, int used, void* user);
 
 heap_t* heap_create(size_t grow_increment)
 {
@@ -77,15 +81,32 @@ void heap_free(heap_t* heap, void* address)
 
 void heap_destroy(heap_t* heap)
 {
-	tlsf_destroy(heap->tlsf);
+	symbol_init();
 
 	arena_t* arena = heap->arena;
 	while (arena)
 	{
+		tlsf_walk_pool(arena->pool, default_walker, heap);
 		arena_t* next = arena->next;
 		VirtualFree(arena, 0, MEM_RELEASE);
 		arena = next;
 	}
 
+	tlsf_destroy(heap->tlsf);
 	VirtualFree(heap, 0, MEM_RELEASE);
+
+	symbol_clean();
 }
+
+static void default_walker(void* ptr, size_t size, int used, void* user)
+{
+	 heap_t* heap = (heap_t*)user;
+	if (used == 1) {
+		debug_print(k_print_warning, "Memory leak of size %x bytes with callstack:\n", (uint32_t)size);
+		void* stack[20] = { 0 };
+		int8_t actual_count = debug_backtrace(stack, 20);
+
+		callstack_print(stack, actual_count, heap);
+	}
+}
+

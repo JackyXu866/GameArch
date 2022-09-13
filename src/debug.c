@@ -70,3 +70,44 @@ int debug_backtrace(void** stack, int stack_capacity)
 {
 	return CaptureStackBackTrace(1, stack_capacity, stack, NULL);
 }
+
+void symbol_init() {
+	SymSetOptions(SYMOPT_LOAD_LINES);
+	if (!SymInitialize(GetCurrentProcess(), 0, TRUE)) {
+		debug_print(k_print_error, "Cannot initialized Symbol\n");
+	}
+}
+
+void symbol_clean() {
+	SymCleanup(GetCurrentProcess());
+}
+
+void callstack_print(void* stack[], int stack_count, heap_t* heap) {
+	SYMBOL_INFO* sym_info = (SYMBOL_INFO*)heap_alloc(heap, sizeof(SYMBOL_INFO) + 254, 8);
+	sym_info->SizeOfStruct = sizeof(SYMBOL_INFO);
+	sym_info->MaxNameLen = 255;
+	sym_info->Flags = SYMFLAG_FUNCTION;
+
+	IMAGEHLP_LINE* line_info = (IMAGEHLP_LINE*)heap_alloc(heap, sizeof(IMAGEHLP_LINE), 8);
+	line_info->SizeOfStruct = sizeof(IMAGEHLP_LINE);
+
+	DWORD displace = 0;
+	for (int i = 0; i < stack_count; i++) {
+		if (SymFromAddr(GetCurrentProcess(), (DWORD64)stack[i], 0, sym_info))
+		{
+			debug_print(k_print_warning, "[%d] %p %s", i, stack[i], sym_info->Name);
+				
+			if (SymGetLineFromAddr64(GetCurrentProcess(), (DWORD64)stack[i], &displace, line_info)) {
+				char* file_name = strrchr(line_info->FileName, '\\')+1;
+				debug_print(k_print_warning, " at %s:%d", file_name, line_info->LineNumber);
+			}
+			
+			debug_print(k_print_warning, "\n");
+		}
+		else debug_print(k_print_warning, "[%d] Cannot retrive function name %p\n", i, stack[i]);
+	}
+	debug_print(k_print_warning, "\n");
+
+	heap_free(heap, sym_info);
+	heap_free(heap, line_info);
+}

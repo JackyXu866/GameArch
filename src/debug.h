@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include "heap.h"
+
 
 // Debugging Support
 
@@ -27,3 +29,12 @@ void debug_print(uint32_t type, _Printf_format_string_ const char* format, ...);
 // On return, stack contains at most stack_capacity addresses.
 // The number of addresses captured is the return value.
 int debug_backtrace(void** stack, int stack_capacity);
+
+// Initializes the symbol handler for current process.
+void symbol_init();
+
+// Deallocates all resources associated with current process handle.
+void symbol_clean();
+
+// Print call stack's name with provided function address.
+void callstack_print(void* stack[], int stack_count, heap_t* heap);
