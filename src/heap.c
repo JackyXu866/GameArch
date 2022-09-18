@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#define CALLSTACK_S 10
 
 typedef struct arena_t
 {
@@ -47,6 +48,7 @@ heap_t* heap_create(size_t grow_increment)
 
 void* heap_alloc(heap_t* heap, size_t size, size_t alignment)
 {
+	size = sizeof(void*)*CALLSTACK_S + size;
 	void* address = tlsf_memalign(heap->tlsf, alignment, size);
 	if (!address)
 	{
@@ -71,17 +73,21 @@ void* heap_alloc(heap_t* heap, size_t size, size_t alignment)
 
 		address = tlsf_memalign(heap->tlsf, alignment, size);
 	}
-	return address;
+
+	debug_backtrace((void**)address, CALLSTACK_S);
+
+	return (char*)address + sizeof(void*) * CALLSTACK_S;
 }
 
 void heap_free(heap_t* heap, void* address)
 {
-	tlsf_free(heap->tlsf, address);
+	tlsf_free(heap->tlsf, (char*)address- sizeof(void*) * CALLSTACK_S);
 }
 
 void heap_destroy(heap_t* heap)
 {
 	symbol_init();
+	tlsf_destroy(heap->tlsf);
 
 	arena_t* arena = heap->arena;
 	while (arena)
@@ -92,7 +98,6 @@ void heap_destroy(heap_t* heap)
 		arena = next;
 	}
 
-	tlsf_destroy(heap->tlsf);
 	VirtualFree(heap, 0, MEM_RELEASE);
 
 	symbol_clean();
@@ -102,11 +107,9 @@ static void default_walker(void* ptr, size_t size, int used, void* user)
 {
 	 heap_t* heap = (heap_t*)user;
 	if (used == 1) {
-		debug_print(k_print_warning, "Memory leak of size %x bytes with callstack:\n", (uint32_t)size);
-		void* stack[20] = { 0 };
-		int8_t actual_count = debug_backtrace(stack, 20);
+		debug_print(k_print_warning, "Memory leak of size %llu bytes with callstack:\n", (uint64_t)size);
 
-		callstack_print(stack, actual_count, heap);
+		callstack_print((void**)ptr, CALLSTACK_S, heap);
 	}
 }
 

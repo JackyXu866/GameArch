@@ -93,6 +93,7 @@ void callstack_print(void* stack[], int stack_count, heap_t* heap) {
 
 	DWORD displace = 0;
 	for (int i = 0; i < stack_count; i++) {
+		if (!stack[i])break;
 		if (SymFromAddr(GetCurrentProcess(), (DWORD64)stack[i], 0, sym_info))
 		{
 			debug_print(k_print_warning, "[%d] %p %s", i, stack[i], sym_info->Name);
