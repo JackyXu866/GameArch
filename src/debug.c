@@ -103,6 +103,9 @@ void callstack_print(void* stack[], int stack_count, heap_t* heap) {
 			}
 			
 			debug_print(k_print_warning, "\n");
+
+			// stop callstack print at main, could be deleted
+			if (!strcmp(sym_info->Name, "main")) break;
 		}
 		else debug_print(k_print_warning, "[%d] Cannot retrive function name %p\n", i, stack[i]);
 	}
