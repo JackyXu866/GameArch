@@ -8,7 +8,7 @@
 thread_t* thread_create(int (*function)(void*), void* data)
 {
 	HANDLE h = CreateThread(NULL, 0, function, data, CREATE_SUSPENDED, NULL);
-	if (h == INVALID_HANDLE_VALUE)
+	if (h == INVALID_HANDLE_VALUE || h == 0)
 	{
 		debug_print(k_print_warning, "Thread failed to create!\n");
 		return NULL;
