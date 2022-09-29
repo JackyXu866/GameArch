@@ -23,6 +23,7 @@ int main(int argc, const char* argv[])
 
 	debug_set_print_mask(k_print_warning | k_print_error);
 
+	/**
 	heap_t* heap = heap_create(2 * 1024 * 1024);
 	wm_window_t* window = wm_create(heap);
 
@@ -43,6 +44,7 @@ int main(int argc, const char* argv[])
 
 	wm_destroy(window);
 	heap_destroy(heap);
+	**/
 
 	return 0;
 }
