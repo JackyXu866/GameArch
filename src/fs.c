@@ -167,7 +167,6 @@ void fs_work_destroy(fs_work_t* work)
 	}
 }
 
-static void file_read(fs_work_t* work, queue_t* compress_queue)
 static void file_read(fs_work_t* work, fs_t* fs)
 {
 	wchar_t wide_path[1024];
