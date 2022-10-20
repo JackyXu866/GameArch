@@ -104,7 +104,7 @@ void trace_duration_push(trace_t* trace, const char* name)
 	(trace->list_durations)[old_num] = tmp_duration;
 
 	thread_queue_t* tmp_queue = find_queue(trace);
-	thread_queue_push(trace, tmp_queue, tmp_duration->name);
+	thread_queue_push(trace, tmp_queue, name);
 }
 
 void trace_duration_pop(trace_t* trace)
@@ -125,14 +125,11 @@ void trace_duration_pop(trace_t* trace)
 	}
 
 	duration_t* tmp_duration = heap_alloc(trace->heap, sizeof(duration_t), 8);
-	tmp_duration->name = heap_alloc(trace->heap, strlen(name) + 1, 8);
-	strncpy_s(tmp_duration->name, strlen(name) + 1, name, strlen(name) + 1);
+	tmp_duration->name = name;
 	tmp_duration->pid = GetCurrentProcessId();
 	tmp_duration->tid = GetCurrentThreadId();
 	tmp_duration->ts = timer_ticks_to_us(timer_get_ticks());
 	tmp_duration->ph = 'E';
-
-	heap_free(trace->heap, name);
 
 	(trace->list_durations)[old_num] = tmp_duration;
 
@@ -171,6 +168,8 @@ void trace_capture_stop(trace_t* trace)
 	fs_work_t* worker = fs_write(file, trace->path, buffer, strlen(buffer), false);
 
 	fs_work_wait(worker);
+	fs_work_destroy(worker);
+	fs_destroy(file);
 	heap_free(trace->heap, buffer);
 }
 
@@ -204,7 +203,7 @@ void thread_queue_push(trace_t* trace, thread_queue_t* q, const char* name) {
 		return;
 	}
 	(q->q)[q->end_index] = heap_alloc(trace->heap, strlen(name) + 1, 8);
-	strncpy_s((q->q)[q->end_index], strlen(name) + 1, name, strlen(name)+1);
+	strncpy_s((q->q)[q->end_index], strlen(name) + 1, name, strlen(name) + 1);
 	q->end_index++;
 }
 

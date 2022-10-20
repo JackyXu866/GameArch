@@ -1,12 +1,12 @@
- {
+{
 	"displayTimeUnit": "ns", "traceEvents" : [
-		{"name": "homework3_slow_function","ph": "B","pid":44300,"tid":"68100","ts":524},
-		{"name": "homework3_slow_function","ph": "B","pid":44300,"tid":"66748","ts":607},
-		{"name": "homework3_slower_function","ph": "B","pid":44300,"tid":"66748","ts":101945},
-		{"name": "homework3_slower_function","ph": "B","pid":44300,"tid":"68100","ts":101941},
-		{"name": "homework3_slow_function","ph": "E","pid":44300,"tid":"68100","ts":302656},
-		{"name": "homework3_slow_function","ph": "E","pid":44300,"tid":"66748","ts":302660},
-		{"name": "homework3_slower_function","ph": "E","pid":44300,"tid":"68100","ts":302690},
-		{"name": "homework3_slower_function","ph": "E","pid":44300,"tid":"66748","ts":302696} 
+		{"name": "homework3_slow_function","ph": "B","pid":66680,"tid":"45152","ts":762},
+		{"name": "homework3_slow_function","ph": "B","pid":66680,"tid":"38768","ts":835},
+		{"name": "homework3_slower_function","ph": "B","pid":66680,"tid":"45152","ts":101639},
+		{"name": "homework3_slower_function","ph": "B","pid":66680,"tid":"38768","ts":101649},
+		{"name": "homework3_slow_function","ph": "E","pid":66680,"tid":"45152","ts":301933},
+		{"name": "homework3_slow_function","ph": "E","pid":66680,"tid":"38768","ts":301943},
+		{"name": "homework3_slower_function","ph": "E","pid":66680,"tid":"45152","ts":301952},
+		{"name": "homework3_slower_function","ph": "E","pid":66680,"tid":"38768","ts":301957} 
 	]
 }

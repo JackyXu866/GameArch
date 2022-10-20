@@ -22,10 +22,10 @@ int main(int argc, const char* argv[])
 {
 	debug_install_exception_handler();
 
-	/*
-	homework1_test();
-	homework2_test();
-	*/
+	
+	// homework1_test();
+	// homework2_test();
+	
 
 	timer_startup();
 
@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
 
 	debug_set_print_mask(k_print_info | k_print_warning | k_print_error);
 
-
+	/*
 	heap_t* heap = heap_create(2 * 1024 * 1024);
 	wm_window_t* window = wm_create(heap);
 	timer_object_t* root_time = timer_object_create(heap, NULL);
@@ -59,7 +59,7 @@ int main(int argc, const char* argv[])
 
 	timer_object_destroy(root_time);
 	wm_destroy(window);
-
+	*/
 	return 0;
 }
 
