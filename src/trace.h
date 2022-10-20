@@ -1,5 +1,6 @@
 #pragma once
 
+#include "heap.h"
 typedef struct heap_t heap_t;
 
 typedef struct trace_t trace_t;
