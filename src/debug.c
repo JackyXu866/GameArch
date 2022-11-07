@@ -68,7 +68,7 @@ void debug_print(uint32_t type, _Printf_format_string_ const char* format, ...)
 
 int debug_backtrace(void** stack, int stack_capacity)
 {
-	return CaptureStackBackTrace(2, stack_capacity, stack, NULL);
+	return CaptureStackBackTrace(1, stack_capacity, stack, NULL);
 }
 
 void symbol_init() {

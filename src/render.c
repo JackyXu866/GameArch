@@ -102,6 +102,7 @@ void render_destroy(render_t* render)
 	queue_push(render->queue, NULL);
 	thread_destroy(render->thread);
 	heap_free(render->heap, render);
+	queue_destroy(render->queue);
 }
 
 void render_push_model(render_t* render, ecs_entity_ref_t* entity, gpu_mesh_info_t* mesh, gpu_shader_info_t* shader, gpu_uniform_buffer_info_t* uniform)
