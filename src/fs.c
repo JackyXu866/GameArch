@@ -224,12 +224,6 @@ static void file_read(fs_work_t* work, fs_t* fs)
 	event_signal(work->done);
 }
 
-int get_hash(void* address, int bucket_count)
-{
-	return (intptr_t)address % bucket_count;
-}
-
-
 static void file_write(fs_work_t* work)
 {
 	wchar_t wide_path[1024];
