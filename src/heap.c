@@ -10,7 +10,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#define CALLSTACK_S 2
+#define CALLSTACK_S 1
 
 typedef struct arena_t
 {
