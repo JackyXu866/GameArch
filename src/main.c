@@ -6,6 +6,10 @@
 #include "timer.h"
 #include "wm.h"
 
+// HW
+#include "trace.h"
+#include "thread.h"
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -31,7 +35,7 @@ int main(int argc, const char* argv[])
 
 	debug_set_print_mask(k_print_info | k_print_warning | k_print_error);
 
-	/*
+
 	heap_t* heap = heap_create(2 * 1024 * 1024);
 	fs_t* fs = fs_create(heap, 8);
 	wm_window_t* window = wm_create(heap);
