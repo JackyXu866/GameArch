@@ -25,6 +25,11 @@
 #define screen_w 160.0f/9.0f
 #define screen_h 10.0f
 
+#define max_speed 13
+#define min_speed 3
+#define max_gap 25000
+#define min_gap 8000
+
 typedef struct transform_component_t
 {
 	transform_t transform;
@@ -49,7 +54,7 @@ typedef struct player_component_t
 
 typedef struct enemy_component_t
 {
-	int index;
+	int row;
 } enemy_component_t;
 
 
@@ -86,6 +91,11 @@ typedef struct frogger_game_t {
 
 	fs_work_t* vertex_shader_work;
 	fs_work_t* fragment_shader_work;
+
+	int row_count;
+	uint64_t row_timer[16];
+	float row_speed[16];
+	uint64_t row_gap[16];
 } frogger_game_t;
 
 
@@ -101,7 +111,8 @@ static void spawn_player(frogger_game_t* game, int index);
 static void update_players(frogger_game_t* game);
 
 static void load_enemy(frogger_game_t* game);
-static void spawn_enemy(frogger_game_t* game, int index);
+static void spawn_enemies(frogger_game_t* game);
+static void spawn_enemy(frogger_game_t* game, int row);
 static void update_enemies(frogger_game_t* game);
 
 static bool check_collide(transform_t* player, transform_t* enemy);
@@ -117,6 +128,7 @@ frogger_game_t* frogger_game_create(heap_t* heap, fs_t* fs, wm_window_t* window,
 	game->render = render;
 
 	game->timer = timer_object_create(heap, NULL);
+	srand((uint32_t)time(NULL));
 
 	game->ecs = ecs_create(heap);
 	game->transform_type = ecs_register_component_type(game->ecs, "transform", sizeof(transform_component_t), _Alignof(transform_component_t));
@@ -125,12 +137,16 @@ frogger_game_t* frogger_game_create(heap_t* heap, fs_t* fs, wm_window_t* window,
 	game->player_type = ecs_register_component_type(game->ecs, "player", sizeof(player_component_t), _Alignof(player_component_t));
 	game->enemy_type = ecs_register_component_type(game->ecs, "enemy", sizeof(enemy_component_t), _Alignof(enemy_component_t));
 	game->name_type = ecs_register_component_type(game->ecs, "name", sizeof(name_component_t), _Alignof(name_component_t));
+	
+	game->row_count = 3;
+	for (int i = 0; i < game->row_count; i++) {
+		game->row_timer[i] = 0;
+		game->row_speed[i] = (float)(rand() % (max_speed - min_speed + 1) + min_speed);
+		game->row_gap[i] = rand() % (max_gap - min_gap + 1) + min_gap;
+	}
 
 	load_resources(game);
 	spawn_player(game, 0);
-	spawn_enemy(game, 0);
-	spawn_enemy(game, 1);
-	spawn_enemy(game, 2);
 	spawn_camera(game);
 
 	return game;
@@ -146,6 +162,7 @@ void frogger_game_destroy(frogger_game_t* game) {
 void frogger_game_update(frogger_game_t* game) {
 	timer_object_update(game->timer);
 	ecs_update(game->ecs);
+	spawn_enemies(game);
 
 	update_players(game);
 	update_enemies(game);
@@ -338,6 +355,7 @@ static void update_players(frogger_game_t* game)
 		// goal
 		if (transform_comp->transform.translation.z < -screen_h + player_h ) {
 			transform_comp->transform.translation.z = screen_h -player_h;
+			transform_comp->transform.translation.y = 0.0f;
 		}
 
 		// out of bound
@@ -370,7 +388,6 @@ static void load_enemy(frogger_game_t* game) {
 	};
 
 	// random a color for all sides
-	srand((uint32_t)time(NULL));
 	vec3f_t color = { (float)rand() / (float)RAND_MAX, 
 		(float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
 
@@ -415,7 +432,19 @@ static void load_enemy(frogger_game_t* game) {
 	};
 }
 
-static void spawn_enemy(frogger_game_t* game, int index) {
+static void spawn_enemies(frogger_game_t* game) {
+	uint64_t time = timer_object_get_ms(game->timer);
+
+	for (int i = 0; i < game->row_count; i++) {
+		if (game->row_timer[i] < time) {
+			spawn_enemy(game, i);
+			game->row_timer[i] += game->row_gap[i] / (uint64_t)game->row_speed[i];
+		}
+	}
+
+}
+
+static void spawn_enemy(frogger_game_t* game, int row) {
 	uint64_t k_enemy_ent_mask =
 		(1ULL << game->transform_type) |
 		(1ULL << game->model_type) |
@@ -425,14 +454,14 @@ static void spawn_enemy(frogger_game_t* game, int index) {
 
 	transform_component_t* transform_comp = ecs_entity_get_component(game->ecs, game->enemy_ent, game->transform_type, true);
 	transform_identity(&transform_comp->transform);
-	transform_comp->transform.translation.y = ((index == 1) ? -1 : 1) * screen_w;
-	transform_comp->transform.translation.z = -5.0f + (float)index * 5.0f;
+	transform_comp->transform.translation.y = ((row%2 == 1) ? -1 : 1) * screen_w;
+	transform_comp->transform.translation.z = -5.0f + (float)row * 5.0f;
 
 	name_component_t* name_comp = ecs_entity_get_component(game->ecs, game->enemy_ent, game->name_type, true);
 	strcpy_s(name_comp->name, sizeof(name_comp->name), "enemy");
 
 	enemy_component_t* enemy_comp = ecs_entity_get_component(game->ecs, game->enemy_ent, game->enemy_type, true);
-	enemy_comp->index = index;
+	enemy_comp->row = row;
 
 	model_component_t* model_comp = ecs_entity_get_component(game->ecs, game->enemy_ent, game->model_type, true);
 	model_comp->mesh_info = &game->enemy_mesh;
@@ -440,7 +469,7 @@ static void spawn_enemy(frogger_game_t* game, int index) {
 }
 
 static void update_enemies(frogger_game_t* game) {
-	float dt = (float)timer_object_get_delta_ms(game->timer) * 0.005f;
+	float dt = (float)timer_object_get_delta_ms(game->timer) * 0.001f;
 
 	uint32_t key_mask = wm_get_key_mask(game->window);
 
@@ -456,15 +485,15 @@ static void update_enemies(frogger_game_t* game) {
 		transform_t move;
 		transform_identity(&move);
 		move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_right(), 
-					((enemy_comp->index == 1) ? 1 : -1)*dt));
+					((enemy_comp->row%2 == 1) ? 1 : -1)*dt*game->row_speed[enemy_comp->row]));
 
 		transform_multiply(&transform_comp->transform, &move);
 
 		// delete out of bound object
 		if (transform_comp->transform.translation.y < -screen_w - enemy_w ||
 			transform_comp->transform.translation.y > screen_w + enemy_w) {
-			transform_comp->transform.translation.y = -1 * transform_comp->transform.translation.y;
-			//ecs_entity_remove(game->ecs, ecs_query_get_entity(game->ecs, &query), false);
+			//transform_comp->transform.translation.y = -1 * transform_comp->transform.translation.y;
+			ecs_entity_remove(game->ecs, ecs_query_get_entity(game->ecs, &query), false);
 		}
 
 
