@@ -48,12 +48,12 @@ int main(int argc, const char* argv[])
 	}
 	net_t* net = net_create(heap, port);
 
-	simple_game_t* game = simple_game_create(heap, fs, window, render);
+	frogger_game_t* game = frogger_game_create(heap, fs, window, render);
 
 	while (!wm_pump(window))
 	{
 		net_update(net);
-		simple_game_update(game);
+		frogger_game_update(game);
 	}
 
 	/* XXX: Shutdown render before the game. Render uses game resources. */
