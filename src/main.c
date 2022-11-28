@@ -1,7 +1,6 @@
 #include "debug.h"
 #include "fs.h"
 #include "heap.h"
-#include "net.h"
 #include "render.h"
 #include "simple_game.h"
 #include "frogger_game.h"
@@ -33,6 +32,8 @@ int main(int argc, const char* argv[])
 
 	timer_startup();
 
+	cpp_test_function(42);
+
 	// homework3_test();
 
 
@@ -61,7 +62,6 @@ int main(int argc, const char* argv[])
 
 	frogger_game_destroy(game);
 
-	net_destroy(net);
 	wm_destroy(window);
 	fs_destroy(fs);
 	heap_destroy(heap);
