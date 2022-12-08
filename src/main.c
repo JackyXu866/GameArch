@@ -6,6 +6,8 @@
 #include "frogger_game.h"
 #include "timer.h"
 #include "wm.h"
+#include "net.h"
+#include "cpp_test.h"
 
 // HW
 #include "trace.h"
@@ -42,18 +44,18 @@ int main(int argc, const char* argv[])
 	wm_window_t* window = wm_create(heap);
 	render_t* render = render_create(heap, window);
 
-	int port = 12345;
-	if (argc >= 2)
-	{
-		port = atoi(argv[1]);
-	}
-	net_t* net = net_create(heap, port);
+	//int port = 12345;
+	//if (argc >= 2)
+	//{
+	//	port = atoi(argv[1]);
+	//}
+	//net_t* net = net_create(heap, port);
 
 	frogger_game_t* game = frogger_game_create(heap, fs, window, render);
 
 	while (!wm_pump(window))
 	{
-		net_update(net);
+		//net_update(net);
 		frogger_game_update(game);
 	}
 

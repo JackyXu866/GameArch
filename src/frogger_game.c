@@ -9,6 +9,7 @@
 #include "transform.h"
 #include "wm.h"
 #include "debug.h"
+#include "input.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -334,21 +335,32 @@ static void update_players(frogger_game_t* game)
 
 		transform_t move;
 		transform_identity(&move);
+		float v = input_get_vertical(wm_get_input(game->window));
+		float h = input_get_horizontal(wm_get_input(game->window));
 		if (key_mask & k_key_up)
 		{
-			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_up(), -dt));
+			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_up(), -dt*v));
 		}
 		if (key_mask & k_key_down)
 		{
-			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_up(), dt));
+			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_up(), dt*v));
 		}
 		if (key_mask & k_key_left)
 		{
-			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_right(), -dt));
+			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_right(), -dt*h));
 		}
 		if (key_mask & k_key_right)
 		{
-			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_right(), dt));
+			move.translation = vec3f_add(move.translation, vec3f_scale(vec3f_right(), dt*h));
+		}
+		if (key_mask & k_fire_1) {
+			debug_print(k_print_info, "Fired\n");
+		}
+		if (key_mask & k_fire_2) {
+			debug_print(k_print_info, "Fired 2\n");
+		}
+		if (key_mask & k_fire_3) {
+			debug_print(k_print_info, "Fired 3\n");
 		}
 		transform_multiply(&transform_comp->transform, &move);
 
@@ -509,6 +521,7 @@ static void update_enemies(frogger_game_t* game) {
 				//debug_print(k_print_info, "Collide\n");
 				transform_comp_player->transform.translation.z = screen_h - player_h;
 				transform_comp_player->transform.translation.y = 0.0f;
+				set_vibration(wm_get_input(game->window), 0, 65535, 65535);
 			}
 		}
 

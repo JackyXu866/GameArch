@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "input.h"
 
 // Window Manager
 // 
@@ -41,14 +42,14 @@ void wm_destroy(wm_window_t* window);
 // This will refresh the mouse and key state on the window.
 bool wm_pump(wm_window_t* window);
 
-// Get a mask of all mouse buttons current held.
-uint32_t wm_get_mouse_mask(wm_window_t* window);
+// Get the input object for a window.
+input_t* wm_get_input(wm_window_t* window);
 
-// Get a mask of all keyboard keys current held.
+// Get a mask of all keys current held.
 uint32_t wm_get_key_mask(wm_window_t* window);
 
-// Get relative mouse movement in x and y.
-void wm_get_mouse_move(wm_window_t* window, int* x, int* y);
+// Get relative cursor movement in x and y.
+void wm_get_mouse_move(wm_window_t* window, float* x, float* y);
 
 // Get the raw OS window object.
 void* wm_get_raw_window(wm_window_t* window);
